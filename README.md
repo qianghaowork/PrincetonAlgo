@@ -25,4 +25,22 @@ Throw a java.lang.NullPointerException if the client attempts to add a null item
 ##Performance requirements.   
 Your deque implementation must support each deque operation in constant worst-case time. A deque containing n items must use at most 48n + 192 bytes of memory. and use space proportional to the number of items currently in the deque. Additionally, your iterator implementation must support each operation (including construction) in constant worst-case time.
 
+## 3. Colinear Points
+http://coursera.cs.princeton.edu/algs4/assignments/collinear.html
+
+Given a set of n distinct points in the plane, find every (maximal) line segment that connects a subset of 4 or more of the points.
+
+## Brute force
+Write a program BruteCollinearPoints.java that examines 4 points at a time and checks whether they all lie on the same line segment, returning all such line segments. To check whether the 4 points p, q, r, and s are collinear, check whether the three slopes between p and q, between p and r, and between p and s are all equal.
+
+The method segments() should include each line segment containing 4 points exactly once. If 4 points appear on a line segment in the order p→q→r→s, then you should include either the line segment p→s or s→p (but not both) and you should not include subsegments such as p→r or q→r. For simplicity, we will not supply any input to BruteCollinearPoints that has 5 or more collinear points.
+
+## Fast sorting-based solution
+
+Remarkably, it is possible to solve the problem much faster than the brute-force solution described above. Given a point p, the following method determines whether p participates in a set of 4 or more collinear points.
+
+Think of p as the origin.
+For each other point q, determine the slope it makes with p.
+Sort the points according to the slopes they makes with p.
+Check if any 3 (or more) adjacent points in the sorted order have equal slopes with respect to p. If so, these points, together with p, are collinear.
 
