@@ -44,3 +44,31 @@ For each other point q, determine the slope it makes with p.
 Sort the points according to the slopes they makes with p.
 Check if any 3 (or more) adjacent points in the sorted order have equal slopes with respect to p. If so, these points, together with p, are collinear.
 
+## 4. 8 Puzzle
+http://coursera.cs.princeton.edu/algs4/assignments/8puzzle.html
+
+The 8-puzzle problem is a puzzle invented and popularized by Noyes Palmer Chapman in the 1870s. It is played on a 3-by-3 grid with 8 square blocks labeled 1 through 8 and a blank square. Your goal is to rearrange the blocks so that they are in order, using as few moves as possible. You are permitted to slide blocks horizontally or vertically into the blank square. The following shows a sequence of legal moves from an initial board (left) to the goal board (right).
+
+
+    1  3        1     3        1  2  3        1  2  3        1  2  3
+ 4  2  5   =>   4  2  5   =>   4     5   =>   4  5      =>   4  5  6
+ 7  8  6        7  8  6        7  8  6        7  8  6        7  8 
+
+ initial        1 left          2 up          5 left          goal
+
+## 5. Kd-Trees
+
+http://coursera.cs.princeton.edu/algs4/assignments/kdtree.html
+
+Write a data type to represent a set of points in the unit square (all points have x- and y-coordinates between 0 and 1) using a 2d-tree to support efficient range search (find all of the points contained in a query rectangle) and nearest neighbor search (find a closest point to a query point). 2d-trees have numerous applications, ranging from classifying astronomical objects to computer animation to speeding up neural networks to mining data to image retrieval.
+
+## 2d-tree implementation
+
+Write a mutable data type KdTree.java that uses a 2d-tree to implement the same API (but replace PointSET with KdTree). A 2d-tree is a generalization of a BST to two-dimensional keys. The idea is to build a BST with points in the nodes, using the x- and y-coordinates of the points as keys in strictly alternating sequence.
+
+### Search and insert
+The algorithms for search and insert are similar to those for BSTs, but at the root we use the x-coordinate (if the point to be inserted has a smaller x-coordinate than the point at the root, go left; otherwise go right); then at the next level, we use the y-coordinate (if the point to be inserted has a smaller y-coordinate than the point in the node, go left; otherwise go right); then at the next level the x-coordinate, and so forth.
+
+### Draw 
+A 2d-tree divides the unit square in a simple way: all the points to the left of the root go in the left subtree; all those to the right go in the right subtree; and so forth, recursively. Your draw() method should draw all of the points to standard draw in black and the subdivisions in red (for vertical splits) and blue (for horizontal splits). This method need not be efficient—it is primarily for debugging.
+
