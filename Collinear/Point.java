@@ -2,17 +2,17 @@
  *  Compilation:  javac Point.java
  *  Execution:    java Point
  *  Dependencies: none
- *  
+ *
  *  An immutable data type for points in the plane.
  *  For use on Coursera, Algorithms Part I programming assignment.
  *
  ******************************************************************************/
 
-import java.util.Comparator;
-import java.util.Arrays;
 import edu.princeton.cs.algs4.StdDraw;
-import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;
+
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class Point implements Comparable<Point> {
 
@@ -22,8 +22,8 @@ public class Point implements Comparable<Point> {
     /**
      * Initializes a new point.
      *
-     * @param  x the <em>x</em>-coordinate of the point
-     * @param  y the <em>y</em>-coordinate of the point
+     * @param x the <em>x</em>-coordinate of the point
+     * @param y the <em>y</em>-coordinate of the point
      */
     public Point(int x, int y) {
         /* DO NOT MODIFY */
@@ -58,14 +58,14 @@ public class Point implements Comparable<Point> {
      * Double.POSITIVE_INFINITY if the line segment is vertical;
      * and Double.NEGATIVE_INFINITY if (x0, y0) and (x1, y1) are equal.
      *
-     * @param  that the other point
+     * @param that the other point
      * @return the slope between this point and the specified point
      */
-    public double slopeTo(Point that) {  
-        if (compareTo(that) == 0) return Double.NEGATIVE_INFINITY;
+    public double slopeTo(Point that) {
+        if (this.x == that.x && this.y == that.y) return Double.NEGATIVE_INFINITY;
         if (this.y == that.y) return 0.0;
         if (this.x == that.x) return Double.POSITIVE_INFINITY;
-        return (double)(that.y - this.y)/(that.x - this.x);
+        return (double) (that.y - this.y) / (that.x - this.x);
     }
 
     /**
@@ -73,24 +73,17 @@ public class Point implements Comparable<Point> {
      * Formally, the invoking point (x0, y0) is less than the argument point
      * (x1, y1) if and only if either y0 < y1 or if y0 = y1 and x0 < x1.
      *
-     * @param  that the other point
+     * @param that the other point
      * @return the value <tt>0</tt> if this point is equal to the argument
-     *         point (x0 = x1 and y0 = y1);
-     *         a negative integer if this point is less than the argument
-     *         point; and a positive integer if this point is greater than the
-     *         argument point
+     * point (x0 = x1 and y0 = y1);
+     * a negative integer if this point is less than the argument
+     * point; and a positive integer if this point is greater than the
+     * argument point
      */
     public int compareTo(Point that) {
-        if (this.y < that.y) 
-           return -1;
-        else if (this.y > that.y)
-            return 1;
-        else if (this.x < that.x)
-            return -1;
-        else if (this.x > that.x)
-            return 1;
-        else
-            return 0;
+        if (this.x == that.x && this.y == that.y) return 0;
+        if (this.y < that.y || (this.y == that.y && this.x < that.x)) return -1;
+        else return 1;
     }
 
     /**
@@ -105,17 +98,12 @@ public class Point implements Comparable<Point> {
             public int compare(Point p1, Point p2) {
                 double slope1 = slopeTo(p1);
                 double slope2 = slopeTo(p2);
-                if (slope1 == slope2) {
-                    return 0;
-                }
-                if (slope1 < slope2) {
-                    return -1;
-                }
-                return 1;
+                if (slope1 < slope2) return -1;
+                if (slope1 > slope2) return 1;
+                return 0;
             }
         };
     }
-
 
     /**
      * Returns a string representation of this point.
@@ -133,35 +121,17 @@ public class Point implements Comparable<Point> {
      * Unit tests the Point data type.
      */
     public static void main(String[] args) {
-        /* YOUR CODE HERE */
-        In in = new In(args[0]);
-        int n = in.readInt();
-        Point[] points = new Point[n];
-        for (int i = 0; i < n; i++) {
-            int x = in.readInt();
-            int y = in.readInt();
-            points[i] = new Point(x, y);
+        Point a = new Point(0, 0);
+        Point b = new Point(0, 5);
+        Point c = new Point(5, 0);
+        Point d = new Point(1, 1);
+
+        StdOut.println("same point " + a.compareTo(a) + " slope:" + a.slopeTo(a));
+        StdOut.println("vertical " + b.compareTo(a) + " slope:" + a.slopeTo(b));
+        StdOut.println("horizontal " + a.compareTo(c) + " slope:" + a.slopeTo(c));
+        Point points[] = {b, c, d};
+        Arrays.sort(points, a.slopeOrder());
+        for (int i = 0; i < 3; i++)
             StdOut.println(points[i]);
-        }
-        
-        
-        StdOut.println("After sort points...");
-        Arrays.sort(points);
-        for (Point p : points) 
-           StdOut.println(p);
-        
-        StdOut.println("After sort slopes...");
-        Arrays.sort(points, points[0].slopeOrder());
-        for (Point p : points) 
-           StdOut.println(p);
-        
-    /*
-        StdDraw.show(0);
-        StdDraw.setXscale(0, 32768);
-        StdDraw.setYscale(0, 32768);
-        for (Point p : points) {
-            p.draw();
-        }
-        StdDraw.show(); */
     }
 }
