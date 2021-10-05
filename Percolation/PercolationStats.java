@@ -1,65 +1,58 @@
+import edu.princeton.cs.algs4.StdOut;
 import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.StdStats;
-import edu.princeton.cs.algs4.StdOut;
+import edu.princeton.cs.algs4.Stopwatch;
 
 public class PercolationStats {
+    private final static double INTERVAL = 1.96;
+    private final double[] fractionArray;
+    private final double trialsRoot;
 
-    private int trials; // number of trials
-    private double[] threshsamp; // threshold samples
-
-    // Performs T independent computational experiments on an N-by-N grid.
-    public PercolationStats(int num, int tn) {
-        if (num <= 0 || tn <= 0) {
-            throw new IllegalArgumentException("Given N <= 0 || T <= 0");
+    // perform independent trials on an n-by-n grid
+    public PercolationStats(int n, int trials) {
+        if (n <= 0 || trials <= 0) {
+            throw new IllegalArgumentException("n and trials must be positive");
         }
-        
-        trials = tn;
-        threshsamp = new double[trials];
-        for (int t = 0; t < trials; t++) {
-            Percolation pr = new Percolation(num);
-            int opencnt = 0;
-            while (!pr.percolates()) {
-                int i = StdRandom.uniform(1, num + 1);
-                int j = StdRandom.uniform(1, num + 1);
-                if (!pr.isOpen(i, j)) {
-                    pr.open(i, j);
-                    opencnt++;
-                }
+        this.trialsRoot = Math.sqrt((double) trials);
+        this.fractionArray = new double[trials];
+        for (int i = 0; i < trials; i++) {
+            Percolation percolation = new Percolation(n);
+            while (!percolation.percolates()) {
+                percolation.open(StdRandom.uniform(1, n + 1), StdRandom.uniform(1, n + 1));
             }
-            double ratio = (double) opencnt / (num * num);
-            threshsamp[t] = ratio;
+            this.fractionArray[i] = (double) percolation.numberOfOpenSites() / (n * n);
         }
     }
 
-    // Mean of percolation threshold
+    // sample mean of percolation threshold
     public double mean() {
-        return StdStats.mean(threshsamp);
+        return StdStats.mean(this.fractionArray);
     }
 
-    // Standard deviation of percolation threshold.
+    // sample standard deviation of percolation threshold
     public double stddev() {
-        return StdStats.stddev(threshsamp);
+        return StdStats.stddev(this.fractionArray);
     }
 
-
-    // Return lower bound of the 95% confidence interval.
+    // low endpoint of 95% confidence interval
     public double confidenceLo() {
-        return mean() - ((1.96 * stddev()) / Math.sqrt(trials));
+        return mean() - INTERVAL * stddev() / this.trialsRoot;
     }
 
-    // Returns upper bound of the 95% confidence interval.
+    // high endpoint of 95% confidence interval
     public double confidenceHi() {
-        return mean() + ((1.96 * stddev()) / Math.sqrt(trials));
+        return mean() + INTERVAL * stddev() / this.trialsRoot;
     }
 
+    // test client
     public static void main(String[] args) {
-        int num = Integer.parseInt(args[0]);
-        int tn = Integer.parseInt(args[1]);
-        PercolationStats ps = new PercolationStats(num, tn);
-
-        String confidence = ps.confidenceLo() + ", " + ps.confidenceHi();
-        StdOut.println("mean                    = " + ps.mean());
-        StdOut.println("stddev                  = " + ps.stddev());
-        StdOut.println("95% confidence interval = " + confidence);
+        Stopwatch stopwatch = new Stopwatch();
+        int n = Integer.parseInt(args[0]);
+        int trials = Integer.parseInt(args[1]);
+        PercolationStats stats = new PercolationStats(n, trials);
+        //      StdOut.println("Percolation with weightedQuickUnionUF takes " + stopwatch.elapsedTime() + "s");
+        StdOut.println("mean                    = " + stats.mean());
+        StdOut.println("stddev                  = " + stats.stddev());
+        StdOut.println("95% confidence interval = [" + stats.confidenceLo() + ", " + stats.confidenceHi() + "]");
     }
 }
