@@ -1,155 +1,191 @@
-import java.util.LinkedList;
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.Queue;
+import edu.princeton.cs.algs4.StdOut;
+
+import java.util.Arrays;
 
 public class Board {
-    private static final int SPACE = 0;
+    private final int size;
+    private final int[][] layout;
 
-    private int[][] blocks;
-
-    public Board(int[][] blocks) {
-        this.blocks = copy(blocks);
+    // create a board from an n-by-n array of tiles,
+    // where tiles[row][col] = tile at (row, col)
+    public Board(int[][] tiles) {
+        if (tiles == null || tiles[0] == null)
+            throw new IllegalArgumentException("null entries in given points.");
+        size = tiles[0].length;
+        if (size < 2 || size >= 128)
+            throw new IllegalArgumentException("size should between 2 and 138.");
+        layout = new int[size][size];
+        for (int i = 0; i < size; i++)
+            for (int j = 0; j < size; j++)
+                layout[i][j] = tiles[i][j];
     }
 
-    private int[][] copy(int[][] blocks) {
-        int[][] copy = new int[blocks.length][blocks.length];
-        for (int row = 0; row < blocks.length; row++)
-            for (int col = 0; col < blocks.length; col++)
-                copy[row][col] = blocks[row][col];
-
-        return copy;
-    }
-
-    public int dimension() {
-        return blocks.length;
-    }
-
-    public int hamming() {
-        int count = 0;
-        for (int row = 0; row < blocks.length; row++)
-            for (int col = 0; col < blocks.length; col++)
-                if (blockIsNotInPlace(row, col)) count++;
-
-        return count;
-    }
-
-    private boolean blockIsNotInPlace(int row, int col) {
-        int block = block(row, col);
-
-        return !isSpace(block) && block != goalFor(row, col);
-    }
-
-    private int goalFor(int row, int col) {
-        return row*dimension() + col + 1;
-    }
-
-    private boolean isSpace(int block) {
-        return block == SPACE;
-    }
-
-    public int manhattan() {
-        int sum = 0;
-        for (int row = 0; row < blocks.length; row++)
-            for (int col = 0; col < blocks.length; col++)
-                sum += calculateDistances(row, col);
-
-        return sum;
-    }
-
-    private int calculateDistances(int row, int col) {
-        int block = block(row, col);
-
-        return (isSpace(block)) ? 0 : Math.abs(row - row(block)) + Math.abs(col - col(block));
-    }
-
-    private int block(int row, int col) {
-        return blocks[row][col];
-    }
-
-    private int row (int block) {
-        return (block - 1) / dimension();
-    }
-
-    private int col (int block) {
-        return (block - 1) % dimension();
-    }
-
-    public boolean isGoal() {
-        for (int row = 0; row < blocks.length; row++)
-            for (int col = 0; col < blocks.length; col++)
-                if (blockIsInPlace(row, col)) return false;
-
-        return true;
-    }
-
-    private boolean blockIsInPlace(int row, int col) {
-        int block = block(row, col);
-
-        return !isSpace(block) && block != goalFor(row, col);
-    }
-
-    public Board twin() {
-        for (int row = 0; row < blocks.length; row++)
-            for (int col = 0; col < blocks.length - 1; col++)
-                if (!isSpace(block(row, col)) && !isSpace(block(row, col + 1)))
-                    return new Board(swap(row, col, row, col + 1));
-        throw new RuntimeException();
-    }
-
-    private int[][] swap(int row1, int col1, int row2, int col2) {
-        int[][] copy = copy(blocks);
-        int tmp = copy[row1][col1];
-        copy[row1][col1] = copy[row2][col2];
-        copy[row2][col2] = tmp;
-
-        return copy;
-    }
-
-    public boolean equals(Object y) {
-        if (y==this) return true;
-        if (y==null || !(y instanceof Board) || ((Board)y).blocks.length != blocks.length) return false;
-        for (int row = 0; row < blocks.length; row++)
-            for (int col = 0; col < blocks.length; col++)
-                if (((Board) y).blocks[row][col] != block(row, col)) return false;
-
-        return true;
-    }
-
-    public Iterable<Board> neighbors() {
-        LinkedList<Board> neighbors = new LinkedList<Board>();
-
-        int[] location = spaceLocation();
-        int spaceRow = location[0];
-        int spaceCol = location[1];
-
-        if (spaceRow > 0)               neighbors.add(new Board(swap(spaceRow, spaceCol, spaceRow - 1, spaceCol)));
-        if (spaceRow < dimension() - 1) neighbors.add(new Board(swap(spaceRow, spaceCol, spaceRow + 1, spaceCol)));
-        if (spaceCol > 0)               neighbors.add(new Board(swap(spaceRow, spaceCol, spaceRow, spaceCol - 1)));
-        if (spaceCol < dimension() - 1) neighbors.add(new Board(swap(spaceRow, spaceCol, spaceRow, spaceCol + 1)));
-
-        return neighbors;
-    }
-
-    private int[] spaceLocation() {
-        for (int row = 0; row < blocks.length; row++)
-            for (int col = 0; col < blocks.length; col++)
-                if (isSpace(block(row, col))) {
-                    int[] location = new int[2];
-                    location[0] = row;
-                    location[1] = col;
-
-                    return location;
-                }
-        throw new RuntimeException();
-    }
-
+    // string representation of this board
     public String toString() {
-        StringBuilder str = new StringBuilder();
-        str.append(dimension() + "\n");
-        for (int row = 0; row < blocks.length; row++) {
-            for (int col = 0; col < blocks.length; col++)
-                str.append(String.format("%2d ", block(row, col)));
-            str.append("\n");
+        StringBuilder sb = new StringBuilder();
+        sb.append(size + "\n");
+        sb.append(toString2D(layout));
+        return sb.toString();
+    }
+
+    // board dimension n
+    public int dimension() {
+        return size;
+    }
+
+    // number of tiles out of place
+    public int hamming() {
+        int num = 0;
+        for (int i = 0; i < size; i++)
+            for (int j = 0; j < size; j++) {
+                if (layout[i][j] != 1 + i * size + j)
+                    num++;
+            }
+        return num - 1;
+    }
+
+    // sum of Manhattan distances between tiles and goal
+    public int manhattan() {
+        int num = 0;
+        for (int i = 0; i < size; i++)
+            for (int j = 0; j < size; j++) {
+                if (layout[i][j] > 0)
+                    num += Math.abs((layout[i][j] - 1) / size - i) + Math.abs((layout[i][j] - 1) % size - j);
+            }
+        return num;
+    }
+
+    // is this board the goal board?
+    public boolean isGoal() {
+        return hamming() == 0;
+    }
+
+    // does this board equal y?
+    public boolean equals(Object y) {
+        if (this == y) return true;
+        if (y == null) return false;
+        if (y.getClass() != this.getClass()) return false;
+        Board dst = (Board) y;
+        if (!Arrays.deepEquals(this.layout, dst.layout))
+            return false;
+        return true;
+    }
+
+    // all neighboring boards
+    public Iterable<Board> neighbors() {
+        Queue<Board> queue = new Queue<Board>();
+        int[] zero = findEmpty();
+        if (zero.length == 0)
+            return null;
+        int x0 = zero[0];
+        int y0 = zero[1];
+
+        if (x0 > 0) {
+            int[][] blocksCopy = copyMDArray(layout);
+            swap(blocksCopy, x0, y0, x0 - 1, y0);
+            queue.enqueue(new Board(blocksCopy));
         }
 
-        return str.toString();
+        if (x0 < size - 1) {
+            int[][] blocksCopy = copyMDArray(layout);
+            swap(blocksCopy, x0, y0, x0 + 1, y0);
+            queue.enqueue(new Board(blocksCopy));
+        }
+
+        if (y0 > 0) {
+            int[][] blocksCopy = copyMDArray(layout);
+            swap(blocksCopy, x0, y0, x0, y0 - 1);
+            queue.enqueue(new Board(blocksCopy));
+        }
+
+        if (y0 < size - 1) {
+            int[][] blocksCopy = copyMDArray(layout);
+            swap(blocksCopy, x0, y0, x0, y0 + 1);
+            queue.enqueue(new Board(blocksCopy));
+        }
+        return queue;
+    }
+
+    // a board that is obtained by exchanging any pair of tiles
+    public Board twin() {
+        int[][] blocksCopy = copyMDArray(layout);
+        int value;
+        int lastValue = blocksCopy[0][0];
+        for (int row = 0; row < blocksCopy.length; row++) {
+            for (int col = 0; col < blocksCopy.length; col++) {
+                value = blocksCopy[row][col];
+                if (value != 0 && lastValue != 0 && col > 0) {
+                    blocksCopy[row][col] = lastValue;
+                    blocksCopy[row][col - 1] = value;
+                    return new Board(blocksCopy);
+                }
+                lastValue = value;
+            }
+        }
+        return null;
+    }
+
+    // unit testing (not graded)
+    public static void main(String[] args) {
+        // create initial board from file
+        In in = new In(args[0]);
+        int n = in.readInt();
+        int[][] tiles = new int[n][n];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                tiles[i][j] = in.readInt();
+        Board initial = new Board(tiles);
+        StdOut.println(initial.toString());
+        StdOut.println("Dim: " + initial.dimension());
+        StdOut.println("Hamming: " + initial.hamming());
+        StdOut.println("Mahattan: " + initial.manhattan());
+        StdOut.println("Is it goal? " + initial.isGoal());
+        StdOut.println("twin: " + initial.twin());
+        for (Board b : initial.neighbors())
+            StdOut.println("Neighbor " + b);
+    }
+
+    private static int[][] copyMDArray(int[][] input) {
+        int[][] output = new int[input.length][input[0].length];
+        for (int i = 0; i < input.length; i++) {
+            output[i] = Arrays.copyOf(input[i], input[i].length);
+        }
+        return output;
+    }
+
+    private static void swap(int[][] input, int row, int col, int toRow, int toCol) {
+        int first = input[row][col];
+        input[row][col] = input[toRow][toCol];
+        input[toRow][toCol] = first;
+    }
+
+    // need this util because System.arrayCopy and Arrays.copyOf
+    // will get this wrong and use same pointers
+    // (a 2D array is a 1D array of 1D arrays, etc)
+    private static String toString2D(int[][] input) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < input.length; i++) {
+            for (int j = 0; j < input.length; j++) {
+                int digit = input[i][j];
+                sb.append(" " + digit + " ");
+            }
+            if (i < input.length - 1) {
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
+    private int[] findEmpty() {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (layout[i][j] == 0) {
+                    return new int[]{i, j};
+                }
+            }
+        }
+        return new int[]{};
     }
 }

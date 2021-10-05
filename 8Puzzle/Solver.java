@@ -1,88 +1,107 @@
+import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.MinPQ;
 import edu.princeton.cs.algs4.Stack;
-import edu.princeton.cs.algs4.SymbolDigraph;
-import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;
 
 public class Solver {
-    private class Move implements Comparable<Move> {
-        private Move previous;
-        private Board board;
-        private int numMoves = 0;
+    private class SearchNode implements Comparable<SearchNode> {
+        private Board board = null;
+        private int move = -1;
+        private SearchNode prev = null;
+        private int priorityCache = -1;
 
-        public Move(Board board) {
+        SearchNode(Board board) {
+            if (board == null)
+                return;
             this.board = board;
+            this.priorityCache = board.manhattan();
+            this.move = 0;
         }
 
-        public Move(Board board, Move previous) {
+        SearchNode(Board board, SearchNode prev) {
             this.board = board;
-            this.previous = previous;
-            this.numMoves = previous.numMoves + 1;
+            this.prev = prev;
+            this.move = prev.move + 1;
+            this.priorityCache = board.manhattan();
         }
 
-        public int compareTo(Move move) {
-            return (this.board.manhattan() - move.board.manhattan()) + (this.numMoves - move.numMoves);
+        public int compareTo(SearchNode that) {
+            int thisMan = this.priorityCache >= 0 ? this.priorityCache : this.board.manhattan();
+            int thatMan = that.priorityCache >= 0 ? that.priorityCache : that.board.manhattan();
+            if (thisMan + this.move < thatMan + that.move) return -1;
+            if (thisMan + this.move > thatMan + that.move) return 1;
+            return 0;
         }
     }
 
-    private Move lastMove;
+    private SearchNode solutionNode = new SearchNode(null);
 
+    // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
-        MinPQ<Move> moves = new MinPQ<Move>();
-        moves.insert(new Move(initial));
+        if (initial == null)
+            throw new IllegalArgumentException("null argument.");
+        solutionNode = new SearchNode(initial);
+        SearchNode twinSolutionNode = new SearchNode(initial.twin());
+        MinPQ<SearchNode> pq = new MinPQ<>();
+        MinPQ<SearchNode> twinPq = new MinPQ<>();
+        pq.insert(solutionNode);
+        twinPq.insert(twinSolutionNode);
+        while (true) {
+            solutionNode = pq.delMin();
+            twinSolutionNode = twinPq.delMin();
 
-        MinPQ<Move> twinMoves = new MinPQ<Move>();
-        twinMoves.insert(new Move(initial.twin()));
+            if (twinSolutionNode.board.isGoal()) {
+                solutionNode.move = -1;
+                solutionNode.prev = null;
+                return;
+            }
 
-        while(true) {
-            lastMove = expand(moves);
-            if (lastMove != null || expand(twinMoves) != null) return;
-        }
-    }
-
-    private Move expand(MinPQ<Move> moves) {
-        if(moves.isEmpty()) return null;
-        Move bestMove = moves.delMin();
-        if (bestMove.board.isGoal()) return bestMove;
-        for (Board neighbor : bestMove.board.neighbors()) {
-            if (bestMove.previous == null || !neighbor.equals(bestMove.previous.board)) {
-                moves.insert(new Move(neighbor, bestMove));
+            if (solutionNode.board.isGoal()) {
+                return;
+            }
+            for (Board b : solutionNode.board.neighbors()) {
+                if (solutionNode.prev == null || !b.equals(solutionNode.prev.board))
+                    pq.insert(new SearchNode(b, solutionNode));
+            }
+            for (Board b : twinSolutionNode.board.neighbors()) {
+                if (twinSolutionNode.prev == null || !b.equals(twinSolutionNode.prev.board))
+                    twinPq.insert(new SearchNode(b, twinSolutionNode));
             }
         }
-        return null;
     }
 
+    // is the initial board solvable? (see below)
     public boolean isSolvable() {
-        return (lastMove != null);
+        return solutionNode.move >= 0;
     }
 
+    // min number of moves to solve initial board; -1 if unsolvable
     public int moves() {
-        return isSolvable() ? lastMove.numMoves : -1;
+        return solutionNode.move;
     }
 
+    // sequence of boards in a shortest solution; null if unsolvable
     public Iterable<Board> solution() {
-        if (!isSolvable()) return null;
-
-        Stack<Board> moves = new Stack<Board>();
-        while(lastMove != null) {
-            moves.push(lastMove.board);
-            lastMove = lastMove.previous;
+        if (!isSolvable())
+            return null;
+        Stack<Board> steps = new Stack<>();
+        while (solutionNode != null) {
+            steps.push(solutionNode.board);
+            solutionNode = solutionNode.prev;
         }
-
-        return moves;
+        return steps;
     }
-    
-        public static void main(String[] args) {
 
+    // test client (see below)
+    public static void main(String[] args) {
         // create initial board from file
-        In in = new In("puzzle2x2-unsolvable2.txt");
-        int N = in.readInt();
-        int[][] blocks = new int[N][N];
-        for (int i = 0; i < N; i++)
-            for (int j = 0; j < N; j++)
-                blocks[i][j] = in.readInt();
-        Board initial = new Board(blocks);
-        //System.out.println(initial.isGoal());
+        In in = new In(args[0]);
+        int n = in.readInt();
+        int[][] tiles = new int[n][n];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                tiles[i][j] = in.readInt();
+        Board initial = new Board(tiles);
 
         // solve the puzzle
         Solver solver = new Solver(initial);
