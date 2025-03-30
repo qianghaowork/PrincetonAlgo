@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/8Puzzle" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Baseball" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Collinear" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ContentResize" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/KDTree" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Percolation" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Queue" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Wheeler" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/wordnet" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="algs4" level="project" />
+  </component>
+</module>

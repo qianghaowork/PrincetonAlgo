@@ -18,7 +18,7 @@ public class SeamCarver {
         this.color = new int[width][height];
         for (int i = 0; i < width; i++)
             for (int j = 0; j < height; j++)
-                color[i][j] = picture.getRGB(i, j);
+                color[i][j] = picture.getARGB(i, j);
         initializeEnergy();
     }
 
@@ -59,7 +59,7 @@ public class SeamCarver {
         Picture pic = new Picture(this.width, this.height);
         for (int i = 0; i < width; i++)
             for (int j = 0; j < height; j++)
-                pic.setRGB(i, j, this.color[i][j]);
+                pic.setARGB(i, j, this.color[i][j]);
         initializeEnergy();
         return pic;
     }
@@ -273,7 +273,7 @@ public class SeamCarver {
         SeamCarver sc = new SeamCarver(pic);
         // sc.picture().show();
         StdOut.printf("width = %d, height = %d\n", sc.width(), sc.height());
-        StdOut.printf("(1000, 500) = (%d, %d, %d)\n", sc.getRed(pic.getRGB(1000, 500)), sc.getGreen(pic.getRGB(1000, 500)), sc.getBlue(pic.getRGB(1000, 500)));
+        StdOut.printf("(1000, 500) = (%d, %d, %d)\n", sc.getRed(pic.getARGB(1000, 500)), sc.getGreen(pic.getARGB(1000, 500)), sc.getBlue(pic.getARGB(1000, 500)));
         int count = 500;
         while (count > 0) {
             int[] vertical = sc.findVerticalSeam();
