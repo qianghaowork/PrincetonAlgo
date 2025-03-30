@@ -1,0 +1,12 @@
+# Ignore compiled Java class files
+*.class
+.env
+*.log
+.idea/
+.vscode/
+*.iml
+.gradle/
+out/
+build/
+target/
+
